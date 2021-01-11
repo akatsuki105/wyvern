@@ -34,6 +34,7 @@ var (
 	byteCtr   = 0
 	wordCtr   = 0
 	stringCtr = 0
+	trashCtr  = 0
 )
 
 func init() {
@@ -118,7 +119,7 @@ func Run() int {
 			fmt.Printf("Result: %s\n\n", byteStream(result))
 		}
 		if *verbose {
-			fmt.Printf("Byte: %d, Word: %d, String: %d\n", byteCtr, wordCtr, stringCtr)
+			fmt.Printf("Byte: %d, Word: %d, String: %d, Trash: %d\n", byteCtr, wordCtr, stringCtr, trashCtr)
 		}
 		fmt.Printf("Compression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
 		return exitCodeOK
@@ -302,6 +303,7 @@ func writeTrash(len byte, pos []byte) {
 	if outIndex+int(len) > maxSize {
 		panic("OutBuf too small")
 	}
+	trashCtr++
 
 	c := ((len - 1) % 64) | 0b1100_0000
 	outBuf[outIndex] = c
