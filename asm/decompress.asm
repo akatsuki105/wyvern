@@ -1,5 +1,5 @@
 ; GB-Compress decompressor in RGBASM format.
-; Compatible with GBTD
+; NOT compatible with GBTD
 
 _gb_decompress::
     ld      hl, sp+5
