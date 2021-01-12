@@ -1,7 +1,6 @@
-; GB-Compress decompressor in RGBASM format.
-; NOT compatible with GBTD
+; Wyvern decompressor in RGBASM format.
 
-_gb_decompress::
+_decompress::
     ld      hl, sp+5
     ; de = [sp+5] << 8 | [sp+4] = dest
     ld      a, [hld]
@@ -16,7 +15,7 @@ _gb_decompress::
 
 ; hl = source; de = dest
 ; bc is not changed
-gb_decompress::
+decompress::
     push    bc
     xor     a
     ld      b, a

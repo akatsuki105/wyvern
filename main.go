@@ -14,8 +14,8 @@ type byteStream []byte
 var version string
 
 const (
-	title   = "GB Compress"
-	exeName = "gbcompress"
+	title   = "Wyvern"
+	exeName = "wyvern"
 )
 
 // exit code

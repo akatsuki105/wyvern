@@ -16,7 +16,7 @@ start:
 .exec
     ld hl, src
     ld de, dest
-    call gb_decompress
+    call decompress
 
 .the_end
 	halt					; save battery
