@@ -1,3 +1,10 @@
+.PHONY: build
+build:
+	rgbasm -o hello.o hello.asm
+	rgblink -d -o hello.gb hello.o
+	rgbfix -p 0 -r 0 -v hello.gb 
+	rm -rf hello.o
+
 .PHONY: test
 test:
 	@echo "This test checks decompress.asm is compilable.\n"

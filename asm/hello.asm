@@ -2,7 +2,7 @@
 	nop
 	jp	start
 
-    SECTION "Example",ROM0[$150]		; code starts here
+    SECTION "Main",ROM0[$150]		; code starts here
 
 start:
 	di					; disable interrupts
@@ -13,9 +13,22 @@ start:
 	cp	$90
 	jr	nz,.wait_vbl
 
+.exec
+    ld hl, src
+    ld de, dest
+    call gb_decompress
+
 .the_end
 	halt					; save battery
 ;	nop					    ; nop after halt is mandatory but rgbasm takes care of it :)
 	jr	.the_end			; endless loop
 
     INCLUDE "decompress.asm"
+
+SECTION "Cenotaph Src", ROM0[$200]
+
+src:
+	INCBIN "cenotaph.atr.gbcm"
+
+SECTION "Cenotaph Dest", WRAM0[$c000]
+dest:
