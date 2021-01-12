@@ -6,13 +6,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
+
+type byteStream []byte
 
 var version string
 
 const (
-	title   = "GB Compress"
-	exeName = "gbcompress"
+	title   = "Wyvern"
+	exeName = "wyvern"
 )
 
 // exit code
@@ -27,6 +30,14 @@ var (
 	outIndex = 0
 )
 
+var (
+	byteCtr        = 0
+	wordCtr        = 0
+	longStringCtr  = 0
+	shortStringCtr = 0
+	trashCtr       = 0
+)
+
 func init() {
 	if version == "" {
 		version = "Develop"
@@ -36,7 +47,10 @@ func init() {
 		usage := fmt.Sprintf(`Usage:
     %s [arg] [input] [output]
 input: a filename
-	with no FILE, or when FILE is - or stdin, read standard input
+
+output: a filename
+  with no FILE, write standard output
+
 Arguments: 
 `, exeName)
 
@@ -52,8 +66,9 @@ func main() {
 // Run program
 func Run() int {
 	var (
-		doDecompression = flag.Bool("d", false, "decompress")
-		showVersion     = flag.Bool("v", false, "show version")
+		showVersion     = flag.Bool("V", false, "display Version number and exit")
+		doDecompression = flag.Bool("d", false, "decompression")
+		verbose         = flag.Bool("v", false, "verbose mode")
 	)
 	flag.Parse()
 
@@ -86,7 +101,7 @@ func Run() int {
 					return exitCodeError
 				}
 			} else {
-				fmt.Printf("Result: %+v\n\n", result)
+				fmt.Printf("Result: %s\n\n", byteStream(result))
 			}
 			fmt.Printf("Decompression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
 			return exitCodeOK
@@ -102,7 +117,10 @@ func Run() int {
 				return exitCodeError
 			}
 		} else {
-			fmt.Printf("Result: %+v\n\n", result)
+			fmt.Printf("Result: %s\n\n", byteStream(result))
+		}
+		if *verbose {
+			fmt.Printf("Byte: %d, Word: %d, LongString: %d, ShortString: %d, Trash: %d\n", byteCtr, wordCtr, longStringCtr, shortStringCtr, trashCtr)
 		}
 		fmt.Printf("Compression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
 		return exitCodeOK
@@ -116,69 +134,74 @@ func printVersion() {
 func compress(src []byte) []byte {
 	maxSize = len(src)
 	outBuf = make([]byte, maxSize)
+	outIndex = 0
 
 	var bufPtr, trashSize int
 	for bufPtr < maxSize {
 		// a,a,a,a,a,...
-		x := src[bufPtr]
-		r_rb := byte(1)
-		for (bufPtr+1 < maxSize) && (bufPtr+int(r_rb) < maxSize) && (src[bufPtr+int(r_rb)] == x) && (r_rb < 64) {
-			r_rb++
+		curByte := src[bufPtr]
+		byteLen := byte(1)
+		for (bufPtr+1 < maxSize) && (bufPtr+int(byteLen) < maxSize) && (src[bufPtr+int(byteLen)] == curByte) && (byteLen < 64) {
+			byteLen++
 		}
 
 		// a,b,a,b,a,b,a,b,...
-		// a,a,a,a -> 2aa
-		y := uint16(src[bufPtr]) << 8 // MEM: 0x01 -> 0x02 => Val: (0x01 << 8) | 0x02
+		curWord := uint16(src[bufPtr]) << 8 // MEM: 0x01 -> 0x02 => Val: (0x01 << 8) | 0x02
 		if bufPtr+1 < maxSize {
-			y |= uint16(src[bufPtr+1])
+			curWord |= uint16(src[bufPtr+1])
 		}
-		r_rw := byte(1)
-		for (bufPtr+int(r_rw)*2+1 < maxSize) && (binary.BigEndian.Uint16(src[bufPtr+int(r_rw)*2:]) == y) && (r_rw < 64) {
-			r_rw++
+		wordLen := byte(1)
+		for (bufPtr+int(wordLen)*2+1 < maxSize) && (binary.BigEndian.Uint16(src[bufPtr+int(wordLen)*2:]) == curWord) && (wordLen < 64) {
+			wordLen++
 		}
 
-		rr, sr, r_rs := 0, 0, byte(0)
+		// offset: 01234567
+		// bytes:  abcdebcd
+		// rr:          ↑
+		// [sOff, sLen]: [-4, 3]
+		rr := 0
+		sOff, sLen := 0, byte(0)
 		for rr < bufPtr {
-			// 01234567
-			// abcdebcd
-			//      ↑12
-			// sr=-4 r_rs=3
 			rl := 0
 			for (rr+rl < bufPtr) && (bufPtr+rl < maxSize) && (src[rr+rl] == src[bufPtr+rl]) && (rl < 64) {
 				rl++
 			}
 
-			if rl > int(r_rs) {
-				sr = rr - bufPtr
-				r_rs = byte(rl)
+			if rl > int(sLen) {
+				sOff = rr - bufPtr
+				sLen = byte(rl)
 			}
 			rr++
 		}
 
 		switch {
-		case r_rb > 2 && r_rb > r_rw && r_rb > r_rs:
+		case byteLen > 2 && byteLen > wordLen && byteLen > sLen:
 			if trashSize > 0 {
 				writeTrash(byte(trashSize), src[bufPtr-trashSize:])
 				trashSize = 0
 			}
-			writeByte(r_rb, x)
-			bufPtr += int(r_rb)
-		case (r_rw > 2) && (r_rw*2 > r_rs):
+			writeByte(byteLen, curByte)
+			bufPtr += int(byteLen)
+		case (wordLen > 2) && (wordLen*2 > sLen):
 			if trashSize > 0 {
 				writeTrash(byte(trashSize), src[bufPtr-trashSize:])
 				trashSize = 0
 			}
-			writeWord(r_rw, y)
-			bufPtr += (int(r_rw) * 2)
+			writeWord(wordLen, curWord)
+			bufPtr += (int(wordLen) * 2)
 		default:
 			switch {
-			case r_rs > 3:
+			case sLen > 3:
 				if trashSize > 0 {
 					writeTrash(byte(trashSize), src[bufPtr-trashSize:])
 					trashSize = 0
 				}
-				writeString(r_rs, uint16(sr))
-				bufPtr += int(r_rs)
+				if sOff < -128 {
+					writeLongString(sLen, uint16(sOff))
+				} else {
+					writeShortString(sLen, byte(sOff))
+				}
+				bufPtr += int(sLen)
 			case trashSize >= 64:
 				writeTrash(byte(trashSize), src[bufPtr-trashSize:])
 				trashSize = 0
@@ -208,14 +231,14 @@ func decompress(src []byte) []byte {
 		}
 
 		switch {
-		case b&0b1000_0000 > 0 && b&0b0100_0000 > 0: // if bit6 and bit7 are set, use trash function
-			length := int(b&63 + 1)
+		case bit(b, 7) && bit(b, 6): // if bit6 and bit7 are set, use trash function
+			length := int(b&0b0011_1111 + 1)
 			for i := 0; i < length; i++ {
 				outBuf = append(outBuf, src[index])
 				index++
 			}
-		case b&0b1000_0000 > 0: // if bit7 is set, use string function
-			length, upper, lower := int(b&63+1), src[index+1], src[index]
+		case bit(b, 7) && bit(b, 5): // if (bit7, bit6, bit5) is (1, 0, 1), use long-string function
+			length, upper, lower := int(b&0b0001_1111+1), src[index+1], src[index]
 			offset := int16(upper)<<8 | int16(lower)
 
 			index += 2
@@ -223,8 +246,15 @@ func decompress(src []byte) []byte {
 			for i := 0; i < length; i++ {
 				outBuf = append(outBuf, outBuf[from+i])
 			}
-		case b&0b0100_0000 > 0: // if bit6 is set, use word function
-			length, upper, lower := int(b&63+1), src[index], src[index+1]
+		case bit(b, 7): // if (bit7, bit6, bit5) is (1, 0, 0), use short-string function
+			length, offset := int(b&0b0001_1111+1), int8(src[index])
+			index++
+			from := len(outBuf) + int(offset)
+			for i := 0; i < length; i++ {
+				outBuf = append(outBuf, outBuf[from+i])
+			}
+		case bit(b, 6): // if bit6 is set, use word function
+			length, upper, lower := int(b&0b0011_1111+1), src[index], src[index+1]
 			index += 2
 			for i := 0; i < length; i++ {
 				outBuf = append(outBuf, upper)
@@ -232,7 +262,7 @@ func decompress(src []byte) []byte {
 			}
 		default:
 			// RLE Byte
-			length, data := int((b&63)+1), src[index]
+			length, data := int((b&0b0011_1111)+1), src[index]
 			index++
 			for i := 0; i < length; i++ {
 				outBuf = append(outBuf, data)
@@ -247,6 +277,7 @@ func writeByte(len, data byte) {
 	if outIndex+2 >= maxSize {
 		panic("OutBuf too small")
 	}
+	byteCtr++
 
 	// aaaaaa -> 6,a
 	len = (len - 1) % 64
@@ -259,7 +290,7 @@ func writeWord(len byte, data uint16) {
 	if outIndex+3 >= maxSize {
 		panic("OutBuf too small")
 	}
-
+	wordCtr++
 	// ababab -> 3ab
 	len = ((len - 1) % 64) | 0b0100_0000
 	outBuf[outIndex] = len
@@ -268,23 +299,36 @@ func writeWord(len byte, data uint16) {
 	outIndex += 3
 }
 
-func writeString(len byte, data uint16) {
+func writeLongString(len byte, offset uint16) {
 	if outIndex+3 >= maxSize {
 		panic("OutBuf too small")
 	}
-
-	// abcdebcd (len=3 data=-4)-> abcde
-	i := ((len - 1) % 64) | 0b1000_0000
+	longStringCtr++
+	// abcdebcd (len=3 offset=-257)-> abcde
+	i := ((len - 1) % 0b0001_1111) | 0b1010_0000
 	outBuf[outIndex] = i
-	outBuf[outIndex+1] = byte(data)
-	outBuf[outIndex+2] = byte(data >> 8)
+	outBuf[outIndex+1] = byte(offset)
+	outBuf[outIndex+2] = byte(offset >> 8)
 	outIndex += 3
+}
+
+func writeShortString(len byte, offset byte) {
+	if outIndex+2 >= maxSize {
+		panic("OutBuf too small")
+	}
+	shortStringCtr++
+	// abcdebcd (len=3 offset=-4)-> abcde
+	i := ((len - 1) % 0b0001_1111) | 0b1000_0000
+	outBuf[outIndex] = i
+	outBuf[outIndex+1] = offset
+	outIndex += 2
 }
 
 func writeTrash(len byte, pos []byte) {
 	if outIndex+int(len) > maxSize {
 		panic("OutBuf too small")
 	}
+	trashCtr++
 
 	c := ((len - 1) % 64) | 0b1100_0000
 	outBuf[outIndex] = c
@@ -310,4 +354,21 @@ func writeEnd() {
 	for i := 0; i < outIndex; i++ {
 		outBuf[i] = from[i]
 	}
+}
+
+func (bs byteStream) String() string {
+	builder := &strings.Builder{}
+	builder.WriteString("[")
+	for i, b := range bs {
+		builder.WriteString(fmt.Sprintf("%d", b))
+		if i < len(bs)-1 {
+			builder.WriteString(", ")
+		}
+	}
+	builder.WriteString("]")
+	return builder.String()
+}
+
+func bit(b byte, n int) bool {
+	return b&(1<<n) != 0
 }
