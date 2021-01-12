@@ -8,4 +8,7 @@ build:
 
 .PHONY: test
 test:
+	@echo "**Go**"
 	@go test
+	@echo "\n**Assembly**"
+	@cd ./asm && make test

@@ -2,3 +2,5 @@ gbcompress
 build
 .DS_Store
 **/*.gbcm
+**/*.o
+**/*.gb
