@@ -31,7 +31,7 @@ If you don't specify output filename, use Stdin.
 
 Please use `decompress` function in `asm/decompress.asm`.
 
-If you try decompression, try `asm/hello.gb` is built when you execute `make build`.
+If you want to try decompression, try `asm/hello.gb` is built when you execute `make build`.
 
 ## Benchmark
 
