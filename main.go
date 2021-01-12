@@ -134,6 +134,7 @@ func printVersion() {
 func compress(src []byte) []byte {
 	maxSize = len(src)
 	outBuf = make([]byte, maxSize)
+	outIndex = 0
 
 	var bufPtr, trashSize int
 	for bufPtr < maxSize {
