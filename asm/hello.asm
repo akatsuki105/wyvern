@@ -1,8 +1,8 @@
-	SECTION	"Start",ROM0[$100]		; start vector, followed by header data applied by rgbfix.exe
+SECTION	"Start",ROM0[$100]		; start vector, followed by header data applied by rgbfix.exe
 	nop
 	jp	start
 
-    SECTION "Main",ROM0[$150]		; code starts here
+SECTION "Main",ROM0[$150]		; code starts here
 
 start:
 	di					; disable interrupts

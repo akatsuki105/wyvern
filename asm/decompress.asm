@@ -18,16 +18,19 @@ _gb_decompress::
 ; bc is not changed
 gb_decompress::
     push    bc
+    xor     a
+    ld      b, a
+    ld      c, a
 .loop
-    ld      a, [hli]     ; load command
+    ld      a, [hli]                    ; load command
     or      a
-    jr      z, .exit    ; exit, if last byte
+    jr      z, .exit                    ; exit, if last byte
     bit     7, a
-    jr      nz, .stringOrTrash       ; string functions
+    jr      nz, .stringOrTrash          ; string functions
     bit     6, a
     jr      nz, .word
 ; .byte
-    and     %00111111         ; calc counter
+    and     %00111111                   ; calc counter
     inc     a
     ld      b, a
     ld      a, [hli]
@@ -36,17 +39,17 @@ gb_decompress::
     inc     de
     dec     b
     jr      nz, .byteLoop
-    jr      .loop      ; next command
-.word                   ; RLE word
+    jr      .loop                       ; next command
+.word                                   ; RLE word
     and     %00111111
     inc     a
-    ld      b, [hl]  ; load word into bc
+    ld      b, [hl]                     ; load word into bc
     inc     hl
     ld      c, [hl]
     inc     hl
 .wordLoop
     push    af
-    ld      a, b     ; store word
+    ld      a, b                        ; store word
     ld      [de], a
     inc     de
     ld      a, c
@@ -55,20 +58,28 @@ gb_decompress::
     pop     af
     dec     a
     jr      nz, .wordLoop
-    jr      .loop      ; next command
+    jr      .loop                       ; next command
 .stringOrTrash
     bit     6, a
     jr      nz, .trash
-    ; string repeat
-    and     a, %00111111
-    inc     a
-    push    hl
-    ld      c, [hl]  ; bc = offset
-    inc     hl
+; .string
+    ; offset
+    ld      c, [hl]                     ; c = offset_lower
+    ld      b, %11111111                ; b = offset_upper(in shortString)
+    bit     5, a
+    jr      z, .done
+    ; if bit5 is set, long string
+    inc     hl                          ; b = offset_upper
     ld      b, [hl]
-    ld      h, d     ; hl = de(dest)
+    jr      .done
+.done
+    push    hl
+    ld      h, d                        ; hl = de(dest)
     ld      l, e
-    add     hl, bc   ; hl(from) = hl(dest) + bc(offset)
+    add     hl, bc                      ; hl(from) = hl(dest) + bc(offset)
+    ; length
+    and     a, %00011111
+    inc     a
     ld      b, a
 .stringLoop
     ld      a, [hli]
@@ -78,9 +89,8 @@ gb_decompress::
     jr      nz, .stringLoop
     pop     hl
     inc     hl
-    inc     hl
-    jr      .loop      ; next command
-.trash                   ; string copy
+    jr      .loop                       ; next command
+.trash                                  ; string copy
     and     %00111111
     inc     a
     ld      b, a
@@ -90,7 +100,7 @@ gb_decompress::
     inc     de
     dec     b
     jr      nz, .trashLoop
-    jr      .loop      ; next command
+    jr      .loop                       ; next command. NOTE: bc=0x0000
 .exit
     pop     bc
     ret
