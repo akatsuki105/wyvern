@@ -119,9 +119,11 @@ func Run() int {
 		} else {
 			fmt.Printf("Result: %s\n\n", byteStream(result))
 		}
+
 		if *verbose {
 			fmt.Printf("Byte: %d, Word: %d, LongString: %d, ShortString: %d, Trash: %d\n", byteCtr, wordCtr, longStringCtr, shortStringCtr, trashCtr)
 		}
+
 		fmt.Printf("Compression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
 		return exitCodeOK
 	}
@@ -273,68 +275,73 @@ func decompress(src []byte) []byte {
 	return outBuf
 }
 
-func writeByte(len, data byte) {
-	if outIndex+2 >= maxSize {
-		panic("OutBuf too small")
+func writeByte(length, data byte) {
+	if outIndex+2 >= len(outBuf) {
+		outBuf = extendSlice(outBuf)
+		maxSize = len(outBuf)
 	}
 	byteCtr++
 
 	// aaaaaa -> 6,a
-	len = (len - 1) % 64
-	outBuf[outIndex] = len
+	length = (length - 1) % 64
+	outBuf[outIndex] = length
 	outBuf[outIndex+1] = data
 	outIndex += 2
 }
 
-func writeWord(len byte, data uint16) {
+func writeWord(length byte, data uint16) {
 	if outIndex+3 >= maxSize {
-		panic("OutBuf too small")
+		outBuf = extendSlice(outBuf)
+		maxSize = len(outBuf)
 	}
 	wordCtr++
 	// ababab -> 3ab
-	len = ((len - 1) % 64) | 0b0100_0000
-	outBuf[outIndex] = len
+	length = ((length - 1) % 64) | 0b0100_0000
+	outBuf[outIndex] = length
 	outBuf[outIndex+1] = byte(data >> 8)
 	outBuf[outIndex+2] = byte(data)
 	outIndex += 3
 }
 
-func writeLongString(len byte, offset uint16) {
+func writeLongString(length byte, offset uint16) {
 	if outIndex+3 >= maxSize {
-		panic("OutBuf too small")
+		outBuf = extendSlice(outBuf)
+		maxSize = len(outBuf)
 	}
 	longStringCtr++
-	// abcdebcd (len=3 offset=-257)-> abcde
-	i := ((len - 1) % 0b0001_1111) | 0b1010_0000
+	// abcdebcd (length=3 offset=-257)-> abcde
+	i := ((length - 1) % 0b0001_1111) | 0b1010_0000
 	outBuf[outIndex] = i
 	outBuf[outIndex+1] = byte(offset)
 	outBuf[outIndex+2] = byte(offset >> 8)
 	outIndex += 3
 }
 
-func writeShortString(len byte, offset byte) {
+func writeShortString(length byte, offset byte) {
 	if outIndex+2 >= maxSize {
-		panic("OutBuf too small")
+		outBuf = extendSlice(outBuf)
+		maxSize = len(outBuf)
 	}
 	shortStringCtr++
-	// abcdebcd (len=3 offset=-4)-> abcde
-	i := ((len - 1) % 0b0001_1111) | 0b1000_0000
+	// abcdebcd (length=3 offset=-4)-> abcde
+	i := ((length - 1) % 0b0001_1111) | 0b1000_0000
 	outBuf[outIndex] = i
 	outBuf[outIndex+1] = offset
 	outIndex += 2
 }
 
-func writeTrash(len byte, pos []byte) {
-	if outIndex+int(len) > maxSize {
-		panic("OutBuf too small")
+func writeTrash(length byte, pos []byte) {
+	if outIndex+int(length) >= maxSize {
+		outBuf = extendSlice(outBuf)
+		maxSize = len(outBuf)
 	}
 	trashCtr++
 
-	c := ((len - 1) % 64) | 0b1100_0000
+	c := ((length - 1) % 64) | 0b1100_0000
 	outBuf[outIndex] = c
 	outIndex++
 
-	for i := 0; i < int(len); i++ {
+	for i := 0; i < int(length); i++ {
 		outBuf[outIndex] = pos[i]
 		outIndex++
 	}
@@ -342,7 +349,8 @@ func writeTrash(len byte, pos []byte) {
 
 func writeEnd() {
 	if outIndex+1 >= maxSize {
-		panic("OutBuf too small")
+		outBuf = extendSlice(outBuf)
+		maxSize = len(outBuf)
 	}
 
 	outBuf[outIndex] = 0
@@ -371,4 +379,12 @@ func (bs byteStream) String() string {
 
 func bit(b byte, n int) bool {
 	return b&(1<<n) != 0
+}
+
+func extendSlice(src []byte) []byte {
+	result := make([]byte, len(src)*2)
+	for i, b := range src {
+		result[i] = b
+	}
+	return result
 }

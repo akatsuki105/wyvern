@@ -6,6 +6,11 @@ This program is compression program for GameBoy.
 
 **Build**
 
+Requirements
+
+- Go 1.15
+- make
+
 ```sh
 $ gh repo clone pokemium/wyvern && cd ./wyvern
 $ make build
@@ -13,19 +18,20 @@ $ make build
 
 **Compression**
 
-```sh
-$ wyvern input [output]                        
-```
+Currently, You cannot use multiple input files option 
 
-If you don't specify output filename, use Stdin. 
+```sh
+$ wyvern ./test/cenotaph.atr # Input: ./test/cenotaph.atr, Output: Stdout
+$ wyvern ./test/cenotaph.chr ./test/cenotaph.chr.wyv # Input: ./test/cenotaph.atr, Output: ./test/cenotaph.chr.wyv
+```
 
 **Decompression on Cmd**
 
 ```sh
-$ wyvern -d input [output]                        
+$ wyvern -d input [output]  
+$ wyvern -d ./test/cenotaph.atr.wyv # Input: ./test/cenotaph.atr.wyv, Output: Stdout
+$ wyvern -d ./test/cenotaph.chr.wyv ./test/cenotaph.chr # Input: ./test/cenotaph.chr.wyv, Output: ./test/cenotaph.chr                   
 ```
-
-If you don't specify output filename, use Stdin. 
 
 **Decompression on GameBoy**
 
