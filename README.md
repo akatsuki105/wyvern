@@ -46,15 +46,15 @@ Decompression cycle benchmark uses `decompress` function in `asm/decompress.asm`
 ```sh
 $ ./wyvern ./test/cenotaph.atr
 # Compression: 360 Bytes => 199 Bytes (55%)
-# Decompression: 12436 Cycles
+# Decompression: 11580 Cycles
 
 $ ./wyvern ./test/cenotaph.chr
 # Compression: 4000 Bytes => 3417 Bytes (85%)
-# Decompression: 128924 Cycles
+# Decompression: 117440 Cycles
 
 $ ./wyvern ./test/cenotaph.map
 # Compression: 360 Bytes => 338 Bytes (93%)
-# Decompression: 10548 Cycles
+# Decompression: 9544 Cycles
 ```
 
 ## References

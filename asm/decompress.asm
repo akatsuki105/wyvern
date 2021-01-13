@@ -77,12 +77,23 @@ decompress::
     and     a, %00011111
     inc     a
     ld      b, a
+    ; check if a + e > 0xff
+    add     a, e
+    jr      c, .stringLoop
+.fastStringLoop ; faster than .stringLoop because of using `inc e` instead of `inc de`
+    ld      a, [hli]
+    ld      [de], a
+    inc     e                           ; reduce 1 cycle
+    dec     b
+    jr      nz, .fastStringLoop
+    jr      .stringLoopDone
 .stringLoop
     ld      a, [hli]
     ld      [de], a
     inc     de
     dec     b
     jr      nz, .stringLoop
+.stringLoopDone
     pop     hl
     inc     hl
     jr      .loop                       ; next command
@@ -90,6 +101,16 @@ decompress::
     and     %00111111
     inc     a
     ld      b, a
+    ; check if a + e > 0xff
+    add     a, e
+    jr      c, .trashLoop
+.fastTrashLoop  ; faster than .trashLoop because of using `inc e` instead of `inc de`
+    ld      a, [hli]
+    ld      [de], a
+    inc     e                           ; reduce 1 cycle
+    dec     b
+    jr      nz, .fastTrashLoop
+    jr      .loop 
 .trashLoop                    
     ld      a, [hli]
     ld      [de], a
