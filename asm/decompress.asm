@@ -17,9 +17,6 @@ _decompress::
 ; bc is not changed
 decompress::
     push    bc
-    xor     a
-    ld      b, a
-    ld      c, a
 .loop
     ld      a, [hli]                    ; load command
     or      a
@@ -70,7 +67,6 @@ decompress::
     ; if bit5 is set, long string
     inc     hl                          ; b = offset_upper
     ld      b, [hl]
-    jr      .done
 .done
     push    hl
     ld      h, d                        ; hl = de(dest)

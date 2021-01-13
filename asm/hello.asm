@@ -28,7 +28,7 @@ start:
 SECTION "Cenotaph Src", ROM0[$200]
 
 src:
-	INCBIN "cenotaph.atr.gbcm"
+	INCBIN "cenotaph.atr.wyv"
 
 SECTION "Cenotaph Dest", WRAM0[$c000]
 dest:
