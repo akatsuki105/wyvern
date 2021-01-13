@@ -16,6 +16,9 @@ _decompress::
 ; hl = source; de = dest
 ; bc is not changed
 decompress::
+    printt "Decompress start: "
+    printv(@)
+    printt "\n"
     push    bc
 .loop
     ld      a, [hli]                    ; load command
@@ -99,3 +102,6 @@ decompress::
 .exit
     pop     bc
     ret
+    printt "Decompress end: "
+    printv(@)
+    printt "\n"
