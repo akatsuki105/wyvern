@@ -1,3 +1,9 @@
+printPC: MACRO
+    printt \1
+    printv(@)
+    printt "\n"
+ENDM
+
 SECTION	"Start",ROM0[$100]		; start vector, followed by header data applied by rgbfix.exe
 	nop
 	jp	start
@@ -19,6 +25,7 @@ start:
     call decompress
 
 .the_end
+	printPC "Cycle print point: "
 	halt					; save battery
 ;	nop					    ; nop after halt is mandatory but rgbasm takes care of it :)
 	jr	.the_end			; endless loop
