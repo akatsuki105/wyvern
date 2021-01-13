@@ -41,15 +41,20 @@ If you want to try decompression, try `asm/hello.gb` is built when you execute `
 
 ## Benchmark
 
+Decompression cycle benchmark uses `decompress` function in `asm/decompress.asm`.
+
 ```sh
 $ ./wyvern ./test/cenotaph.atr
 # Compression: 360 Bytes => 199 Bytes (55%)
+# Decompression: 12436 Cycles
 
 $ ./wyvern ./test/cenotaph.chr
 # Compression: 4000 Bytes => 3417 Bytes (85%)
+# Decompression: 128924 Cycles
 
 $ ./wyvern ./test/cenotaph.map
 # Compression: 360 Bytes => 338 Bytes (93%)
+# Decompression: 10548 Cycles
 ```
 
 ## References
