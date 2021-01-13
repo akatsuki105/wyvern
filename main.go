@@ -31,11 +31,16 @@ var (
 )
 
 var (
-	byteCtr        = 0
-	wordCtr        = 0
-	longStringCtr  = 0
-	shortStringCtr = 0
-	trashCtr       = 0
+	byteCtr         = 0
+	byteLens        = []byte{}
+	wordCtr         = 0
+	wordLens        = []byte{}
+	longStringCtr   = 0
+	longStringLens  = []byte{}
+	shortStringCtr  = 0
+	shortStringLens = []byte{}
+	trashCtr        = 0
+	trashLens       = []byte{}
 )
 
 func init() {
@@ -122,6 +127,11 @@ func Run() int {
 
 		if *verbose {
 			fmt.Printf("Byte: %d, Word: %d, LongString: %d, ShortString: %d, Trash: %d\n", byteCtr, wordCtr, longStringCtr, shortStringCtr, trashCtr)
+			fmt.Printf("Byte length list: %v\n", byteLens)
+			fmt.Printf("Word length list: %v\n", wordLens)
+			fmt.Printf("LongString length list: %v\n", longStringLens)
+			fmt.Printf("ShortString length list: %v\n", shortStringLens)
+			fmt.Printf("Trash length list: %v\n", trashLens)
 		}
 
 		fmt.Printf("Compression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
@@ -281,6 +291,7 @@ func writeByte(length, data byte) {
 		maxSize = len(outBuf)
 	}
 	byteCtr++
+	byteLens = append(byteLens, length)
 
 	// aaaaaa -> 6,a
 	length = (length - 1) % 64
@@ -295,6 +306,8 @@ func writeWord(length byte, data uint16) {
 		maxSize = len(outBuf)
 	}
 	wordCtr++
+	wordLens = append(wordLens, length)
+
 	// ababab -> 3ab
 	length = ((length - 1) % 64) | 0b0100_0000
 	outBuf[outIndex] = length
@@ -309,6 +322,8 @@ func writeLongString(length byte, offset uint16) {
 		maxSize = len(outBuf)
 	}
 	longStringCtr++
+	longStringLens = append(longStringLens, length)
+
 	// abcdebcd (length=3 offset=-257)-> abcde
 	i := ((length - 1) % 0b0001_1111) | 0b1010_0000
 	outBuf[outIndex] = i
@@ -323,6 +338,8 @@ func writeShortString(length byte, offset byte) {
 		maxSize = len(outBuf)
 	}
 	shortStringCtr++
+	shortStringLens = append(shortStringLens, length)
+
 	// abcdebcd (length=3 offset=-4)-> abcde
 	i := ((length - 1) % 0b0001_1111) | 0b1000_0000
 	outBuf[outIndex] = i
@@ -336,6 +353,7 @@ func writeTrash(length byte, pos []byte) {
 		maxSize = len(outBuf)
 	}
 	trashCtr++
+	trashLens = append(trashLens, length)
 
 	c := ((length - 1) % 64) | 0b1100_0000
 	outBuf[outIndex] = c
