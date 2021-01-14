@@ -31,16 +31,17 @@ var (
 )
 
 var (
-	byteCtr         = 0
-	byteLens        = []byte{}
-	wordCtr         = 0
-	wordLens        = []byte{}
-	longStringCtr   = 0
-	longStringLens  = []byte{}
-	shortStringCtr  = 0
-	shortStringLens = []byte{}
-	trashCtr        = 0
-	trashLens       = []byte{}
+	byteCtr           = 0
+	byteLens          = []byte{}
+	wordCtr           = 0
+	wordLens          = []byte{}
+	longStringCtr     = 0
+	longStringLens    = []byte{}
+	longStringOffsets = []int16{}
+	shortStringCtr    = 0
+	shortStringLens   = []byte{}
+	trashCtr          = 0
+	trashLens         = []byte{}
 )
 
 func init() {
@@ -130,6 +131,7 @@ func Run() int {
 			fmt.Printf("Byte length list: %v\n", byteLens)
 			fmt.Printf("Word length list: %v\n", wordLens)
 			fmt.Printf("LongString length list: %v\n", longStringLens)
+			fmt.Printf("LongString offset list: %v\n", longStringOffsets)
 			fmt.Printf("ShortString length list: %v\n", shortStringLens)
 			fmt.Printf("Trash length list: %v\n", trashLens)
 		}
@@ -323,6 +325,7 @@ func writeLongString(length byte, offset uint16) {
 	}
 	longStringCtr++
 	longStringLens = append(longStringLens, length)
+	longStringOffsets = append(longStringOffsets, int16(offset))
 
 	// abcdebcd (length=3 offset=-257)-> abcde
 	i := ((length - 1) % 0b0001_1111) | 0b1010_0000
