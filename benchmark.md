@@ -16,7 +16,7 @@
  wyvern & cenotaph.chr | 4000 -> 3417(85%) | 117440
  wyvern & cenotaph.map | 360 -> 338(93%) | 9544
  wyvern & pokered/abra.2bpp | 400 -> 331(82%) | TODO
- wyvern & pokered/red.2bpp | 400 -> 331(43%) | TODO
+ wyvern & pokered/red.2bpp | 784 -> 340(43%) | TODO
  wyvern & pokecrystal/chris.2bpp | 784 -> 375(47%) | TODO 
  wyvern & pokecrystal/suicune_jump.2bpp | 2048 -> 1295(63%) | TODO 
  pb16 & cenotaph.atr | 360 -> 226(62%) | TODO
