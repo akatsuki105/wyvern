@@ -20,21 +20,21 @@ decompress::
     push    bc
 .loop
     ld      a, [hli]                    ; load command
-    or      a
-    jr      z, .exit                    ; exit, if last byte
     bit     7, a
     jr      nz, .stringOrTrash          ; string functions
     bit     6, a
     jr      nz, .word
+    ; if command(a) is zero, last byte
+    or      a
+    jr      z, .exit                    ; exit, if last byte
 ; .byte
     and     %00111111                   ; calc counter
     inc     a
     ld      b, a
     ld      a, [hli]
-    ; hl = dest
     push    hl
     ld      h, d
-    ld      l, e
+    ld      l, e                        ; hl = dest (because following `ld [hli], a` is hotpath)
 .byteLoop
     ld      [hli], a
     dec     b
@@ -49,7 +49,7 @@ decompress::
     ld      b, a                        ; b = length
     ld      a, [hli]                    
     ld      c, [hl]
-    inc     hl                          ; load word into ac
+    inc     hl                          ; load word into ac (use a instead of b in order to reduce cycle in .wordLoop)
     push    hl
     ld      h, d
     ld      l, e                        ; hl = dest
@@ -72,7 +72,7 @@ decompress::
     ld      b, %11111111                ; b = offset_upper(in shortString)
     bit     5, a
     jr      z, .done
-    ; if bit5 is set, long string
+; .longString                             if bit5 is set, long string
     inc     hl                          ; b = offset_upper
     ld      b, [hl]
 .done
