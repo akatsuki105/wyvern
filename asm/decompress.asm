@@ -38,23 +38,24 @@ decompress::
     jr      nz, .byteLoop
     jr      .loop                       ; next command
 .word                                   ; RLE word
-    and     %00111111
+    and     %00111111                   
     inc     a
-    ld      b, [hl]                     ; load word into bc
-    inc     hl
+    ld      b, a                        ; b = length
+    ld      a, [hli]                    
     ld      c, [hl]
-    inc     hl
+    inc     hl                          ; load word into ac
+    push    hl
+    ld      h, d
+    ld      l, e                        ; hl = dest
 .wordLoop
-    push    af
-    ld      a, b                        ; store word
-    ld      [de], a
-    inc     de
-    ld      a, c
-    ld      [de], a
-    inc     de
-    pop     af
-    dec     a
+    ld      [hli], a                    ; store word(ac) into dest(hl)
+    ld      [hl], c
+    inc     hl
+    dec     b
     jr      nz, .wordLoop
+    ld      d, h
+    ld      e, l
+    pop     hl
     jr      .loop                       ; next command
 .stringOrTrash
     bit     6, a

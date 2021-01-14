@@ -13,7 +13,7 @@
   Method | Size | Cycles | 
 ---- | ---- | ----
  wyvern & cenotaph.atr | 360 -> 199(55%) | 11580
- wyvern & cenotaph.chr | 4000 -> 3417(85%) | 117440
+ wyvern & cenotaph.chr | 4000 -> 3417(85%) | 116100
  wyvern & cenotaph.map | 360 -> 338(93%) | 9544
  wyvern & pokered/abra.2bpp | 400 -> 331(82%) | TODO
  wyvern & pokered/red.2bpp | 784 -> 340(43%) | TODO
