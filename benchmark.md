@@ -18,6 +18,8 @@
  wyvern & pokered/abra.2bpp | 400 -> 331(82%) | TODO
  wyvern & pokered/red.2bpp | 784 -> 340(43%) | TODO
  wyvern & pokecrystal/chris.2bpp | 784 -> 375(47%) | TODO 
+ wyvern & pokecrystal/diploma.2bpp | 1792 -> 1202(67%) | TODO 
+ wyvern & pokecrystal/ditto.2bpp | 1024 -> 437(42%) | TODO 
  wyvern & pokecrystal/suicune_jump.2bpp | 2048 -> 1295(63%) | TODO 
  pb16 & cenotaph.atr | 360 -> 226(62%) | TODO
  pb16 & cenotaph.chr | 4000 -> 3329(83%) | TODO
@@ -25,6 +27,8 @@
  pb16 & pokered/abra.2bpp | 400 -> 330(82%) | TODO
  pb16 & pokered/red.2bpp | 784 -> 393(50%) | TODO
  pb16 & pokecrystal/chris.2bpp | 784 -> 425(54%) | TODO 
+ pb16 & pokecrystal/diploma.2bpp | 1792 -> 1037(57%) | TODO 
+ pb16 & pokecrystal/ditto.2bpp | 1024 -> 477(46%) | TODO 
  pb16 & pokecrystal/suicune_jump.2bpp | 2048 -> 1330(64%) | TODO 
  lz4gb & cenotaph.atr | 360 -> 221(61%) | 26240
  lz4gb & cenotaph.chr | 4000 -> 3370(84%) | 223964
@@ -32,9 +36,12 @@
  lz4gb & pokered/abra.2bpp | 400 -> 337(84%) | TODO
  lz4gb & pokered/red.2bpp | 784 -> 362(46%) | TODO
  lz4gb & pokecrystal/chris.2bpp | 784 -> 401(51%) | TODO 
+ lz4gb & pokecrystal/diploma.2bpp | 1792 -> 1199(66%) | TODO 
+ lz4gb & pokecrystal/ditto.2bpp | 1024 -> 422(41%) | TODO 
  lz4gb & pokecrystal/suicune_jump.2bpp | 2048 -> 1295(63%) | TODO 
  pkmncompress & pokered/abra.2bpp | 400 -> 259(64%) | TODO
  pkmncompress & pokered/red.2bpp  | 784 -> 266(33%) | TODO
  lzcomp & pokered/abra.2bpp | 400 -> 310(77%) | TODO 
  lzcomp & pokecrystal/chris.2bpp | 784 -> 365(46%) | TODO 
+ lzcomp & pokecrystal/diploma.2bpp | 1792 -> 1094(61%) | TODO 
  lzcomp & pokecrystal/suicune_jump.2bpp | 2048 -> 1216(59%) | TODO 
