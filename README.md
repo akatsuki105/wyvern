@@ -1,6 +1,6 @@
 # Wyvern
 
-This program is compression program for GameBoy.
+Wyvern is the high-performance compression program for GameBoy.
 
 ## Usage
 
@@ -14,6 +14,7 @@ Requirements
 ```sh
 $ gh repo clone pokemium/wyvern && cd ./wyvern
 $ make build
+$ ./wyvern -h # Help option
 ```
 
 **Compression**
@@ -28,16 +29,15 @@ $ wyvern ./test/cenotaph.chr ./test/cenotaph.chr.wyv # Input: ./test/cenotaph.at
 **Decompression on Cmd**
 
 ```sh
-$ wyvern -d input [output]  
 $ wyvern -d ./test/cenotaph.atr.wyv # Input: ./test/cenotaph.atr.wyv, Output: Stdout
-$ wyvern -d ./test/cenotaph.chr.wyv ./test/cenotaph.chr # Input: ./test/cenotaph.chr.wyv, Output: ./test/cenotaph.chr                   
+$ wyvern -d ./test/cenotaph.chr.wyv ./test/cenotaph.chr # Input: ./test/cenotaph.chr.wyv, Output: ./test/cenotaph.chr
 ```
 
 **Decompression on GameBoy**
 
 Please use `decompress` function in `asm/decompress.asm`.
 
-If you want to try decompression, try `asm/hello.gb` is built when you execute `make build`.
+If you want to try decompression, try `asm/hello.gb` is built when you execute `cd asm && make build`.
 
 ## Benchmark
 
@@ -64,3 +64,5 @@ $ ./wyvern ./test/cenotaph.map
 - [GBTD_GBMB](https://github.com/untoxa/GBTD_GBMB)
 - [Game Boy Compression Playground](https://gitendo.github.io/gbcp/)
 - [gitendo/helloworld](https://github.com/gitendo/helloworld)
+- [pret/pokered](https://github.com/pret/pokered)
+- [pret/pokecrystal](https://github.com/pret/pokecrystal)
