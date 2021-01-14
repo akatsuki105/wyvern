@@ -17,10 +17,10 @@
  wyvern & cenotaph.map | 360 -> 338(93%) | 9304
  wyvern & pokered/abra.2bpp | 400 -> 331(82%) | 10928
  wyvern & pokered/red.2bpp | 784 -> 340(43%) | 14588
- wyvern & pokecrystal/chris.2bpp | 784 -> 375(47%) | TODO 
- wyvern & pokecrystal/diploma.2bpp | 1792 -> 1202(67%) | TODO 
- wyvern & pokecrystal/ditto.2bpp | 1024 -> 437(42%) | TODO 
- wyvern & pokecrystal/suicune_jump.2bpp | 2048 -> 1295(63%) | TODO 
+ wyvern & pokecrystal/chris.2bpp | 784 -> 378(48%) | 16744 
+ wyvern & pokecrystal/diploma.2bpp | 1792 -> 1202(67%) | 54556 
+ wyvern & pokecrystal/ditto.2bpp | 1024 -> 437(42%) | 29116 
+ wyvern & pokecrystal/suicune_jump.2bpp | 2048 -> 1295(63%) | 57716 
  pb16 & cenotaph.atr | 360 -> 226(62%) | TODO
  pb16 & cenotaph.chr | 4000 -> 3329(83%) | TODO
  pb16 & cenotaph.map | 360 -> 367(101%) | TODO
