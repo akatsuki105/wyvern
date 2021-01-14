@@ -31,11 +31,17 @@ decompress::
     inc     a
     ld      b, a
     ld      a, [hli]
+    ; hl = dest
+    push    hl
+    ld      h, d
+    ld      l, e
 .byteLoop
-    ld      [de], a
-    inc     de
+    ld      [hli], a
     dec     b
     jr      nz, .byteLoop
+    ld      d, h
+    ld      e, l
+    pop     hl
     jr      .loop                       ; next command
 .word                                   ; RLE word
     and     %00111111                   
