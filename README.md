@@ -18,7 +18,7 @@ $ make build
 
 **Compression**
 
-Currently, You cannot use multiple input files option 
+Currently, you cannot use multiple input files option 
 
 ```sh
 $ wyvern ./test/cenotaph.atr # Input: ./test/cenotaph.atr, Output: Stdout
@@ -42,6 +42,8 @@ If you want to try decompression, try `asm/hello.gb` is built when you execute `
 ## Benchmark
 
 Decompression cycle benchmark uses `decompress` function in `asm/decompress.asm`.
+
+If you want to know more, jump to [Benchmark document](./benchmark.md).
 
 ```sh
 $ ./wyvern ./test/cenotaph.atr
