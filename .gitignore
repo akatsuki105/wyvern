@@ -5,4 +5,3 @@ build
 **/*.gb
 **/decompress.s
 **/*.sav
-others
