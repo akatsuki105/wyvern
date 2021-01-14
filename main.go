@@ -163,7 +163,7 @@ func compress(src []byte) []byte {
 			curWord |= uint16(src[bufPtr+1])
 		}
 		wordLen := byte(1)
-		for (bufPtr+int(wordLen)*2+1 < maxSize) && (binary.BigEndian.Uint16(src[bufPtr+int(wordLen)*2:]) == curWord) && (wordLen < 64) {
+		for (bufPtr+int(wordLen)*2+2 < maxSize) && (binary.BigEndian.Uint16(src[bufPtr+int(wordLen)*2:]) == curWord) && (wordLen < 64) {
 			wordLen++
 		}
 
