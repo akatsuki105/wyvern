@@ -2,7 +2,7 @@
 
 ## Tools
 
-- wyvern: v1.1.2
+- wyvern: v1.1.3
 - pb16: https://github.com/pinobatch/libbet/blob/8b894e4c02d43ddf2180176ee670e977b0170ccd/tools/pb16.py
 - lz4gb: https://github.com/gitendo/lz4gb/tree/da333add4c956260e6db7c921d6903fe067acc3d
 - pkmncompress: https://github.com/pret/pokered/tree/fc3bbc1358f95038b167d3f8bc9006ab5ab655c1/tools
