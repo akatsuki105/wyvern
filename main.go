@@ -184,7 +184,7 @@ func compress(src []byte) []byte {
 			}
 
 			if rl > int(sLen) {
-				sOff = rr - bufPtr
+				sOff = bufPtr - rr
 				sLen = byte(rl)
 			}
 			rr++
@@ -212,7 +212,7 @@ func compress(src []byte) []byte {
 					writeTrash(byte(trashSize), src[bufPtr-trashSize:])
 					trashSize = 0
 				}
-				if sOff < -128 {
+				if sOff > 0xff {
 					writeLongString(sLen, uint16(sOff))
 				} else {
 					writeShortString(sLen, byte(sOff))
@@ -263,9 +263,9 @@ func decompress(src []byte) []byte {
 				outBuf = append(outBuf, outBuf[from+i])
 			}
 		case bit(b, 7): // if (bit7, bit6, bit5) is (1, 0, 0), use short-string function
-			length, offset := int(b&0b0001_1111+1), int8(src[index])
+			length, offset := int(b&0b0001_1111+1), src[index]
 			index++
-			from := len(outBuf) + int(offset)
+			from := len(outBuf) - int(offset)
 			for i := 0; i < length; i++ {
 				outBuf = append(outBuf, outBuf[from+i])
 			}
@@ -331,6 +331,7 @@ func writeLongString(length byte, offset uint16) {
 	longStringOffsets = append(longStringOffsets, int16(offset))
 
 	// abcdebcd (length=3 offset=-257)-> abcde
+	offset = uint16(-int(offset))
 	i := ((length - 1) % 0b0001_1111) | 0b1010_0000
 	outBuf[outIndex] = i
 	outBuf[outIndex+1] = byte(offset)
@@ -346,7 +347,7 @@ func writeShortString(length byte, offset byte) {
 	shortStringCtr++
 	shortStringLens = append(shortStringLens, length)
 
-	// abcdebcd (length=3 offset=-4)-> abcde
+	// abcdebcd (length=3 offset=130)-> abcde
 	i := ((length - 1) % 0b0001_1111) | 0b1000_0000
 	outBuf[outIndex] = i
 	outBuf[outIndex+1] = offset

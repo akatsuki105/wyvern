@@ -67,14 +67,21 @@ decompress::
     bit     6, a
     jr      nz, .trash
 ; .string
-    ; offset
     ld      c, [hl]                     ; c = offset_lower
-    ld      b, %11111111                ; b = offset_upper(in shortString)
     bit     5, a
-    jr      z, .done
-; .longString                             if bit5 is set, long string
+    jr      z, .shortString
+; .longString                           ; if bit5 is set, long string
     inc     hl                          ; b = offset_upper
     ld      b, [hl]
+    jr      .done
+.shortString
+    ld      b, %11111111                ; b = offset_upper(in shortString)
+    push    af
+    ld      a, c
+    cpl
+    ld      c, a
+    inc     c
+    pop     af
 .done
     push    hl
     ld      h, d                        ; hl = de(dest)

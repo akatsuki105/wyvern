@@ -23,6 +23,11 @@ build-linux:
 clean:
 	@-rm -rf $(BINDIR)
 
+.PHONY: compress
+compress:
+	make build
+	@./wyvern -v ${SRC} ./asm/packed.wyv && cd asm && make build && cd ..
+
 .PHONY: test
 test:
 	@echo "**Go**"
