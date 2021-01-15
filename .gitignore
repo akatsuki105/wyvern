@@ -5,4 +5,5 @@ build
 **/*.gb
 **/decompress.s
 **/*.sav
-others
+comped
+tools/bin/exhal

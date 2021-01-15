@@ -2,11 +2,12 @@
 
 ## Tools
 
-- wyvern: v1.1.2
+- wyvern: v1.1.3
 - pb16: https://github.com/pinobatch/libbet/blob/8b894e4c02d43ddf2180176ee670e977b0170ccd/tools/pb16.py
 - lz4gb: https://github.com/gitendo/lz4gb/tree/da333add4c956260e6db7c921d6903fe067acc3d
 - pkmncompress: https://github.com/pret/pokered/tree/fc3bbc1358f95038b167d3f8bc9006ab5ab655c1/tools
 - lzcomp: https://github.com/pret/pokecrystal/tree/7d3ea88611efbc2f9b903063e2816b1cae1bad35/tools
+- inhal: https://github.com/devinacker/exhal/tree/76b12eebd3fcd90fd3f21d427b62d9de8f5fb797
 
 ## Results
 
@@ -45,3 +46,12 @@
  lzcomp & pokecrystal/chris.2bpp | 784 -> 365(46%) | TODO 
  lzcomp & pokecrystal/diploma.2bpp | 1792 -> 1094(61%) | TODO 
  lzcomp & pokecrystal/suicune_jump.2bpp | 2048 -> 1216(59%) | TODO 
+ inhal & cenotaph.atr | 360 -> 203(56%) | TODO
+ inhal & cenotaph.chr | 4000 -> 3329(83%) | TODO
+ inhal & cenotaph.map | 360 -> 127(35%) | TODO
+ inhal & pokered/abra.2bpp | 400 -> 324(81%) | TODO
+ inhal & pokered/red.2bpp | 784 -> 347(44%) | TODO
+ inhal & pokecrystal/chris.2bpp | 784 -> 374(47%) | TODO 
+ inhal & pokecrystal/diploma.2bpp | 1792 -> 1118(62%) | TODO 
+ inhal & pokecrystal/ditto.2bpp | 1024 -> 382(37%) | TODO 
+ inhal & pokecrystal/suicune_jump.2bpp | 2048 -> 1266(61%) | TODO 
