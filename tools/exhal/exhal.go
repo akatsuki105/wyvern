@@ -22,6 +22,11 @@ const (
 )
 
 var (
+	cmd5LengthList = [][2]int{}
+	cmd6LengthList = [][2]int{}
+)
+
+var (
 	srcIndex  = 0
 	destIndex = 0
 )
@@ -61,7 +66,7 @@ func Run() int {
 			return exitCodeError
 		}
 	} else {
-		fmt.Printf("Result: %s\n\n", byteStream(result))
+		// fmt.Printf("Result: %s\n\n", byteStream(result))
 	}
 	fmt.Printf("Decompression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
 	return exitCodeOK
@@ -140,8 +145,9 @@ func Decompress(src []byte) []byte {
 				panic("decompress size exceeds max limit: 64KB")
 			}
 
+			cmd5LengthList = append(cmd5LengthList, [2]int{offset - len(decompressed), length})
 			for i := 0; i < length; i++ {
-				decompressed = append(decompressed, rotate(decompressed[offset+i]))
+				decompressed = append(decompressed, rotate(decompressed[offset+i])) // [0x80, 0x2a, rotate(0x80), rotate(0x54)]
 			}
 			srcIndex += 2
 		case 6: // backwards backref (NOTE: offset is big-endian)
@@ -151,8 +157,9 @@ func Decompress(src []byte) []byte {
 				panic("offset < length-1")
 			}
 
+			cmd6LengthList = append(cmd6LengthList, [2]int{offset - len(decompressed), length})
 			for i := 0; i < length; i++ {
-				decompressed = append(decompressed, decompressed[offset-i])
+				decompressed = append(decompressed, decompressed[offset-i]) // [1, 2, 3, 4, 4, 3, 2, 1]
 			}
 			srcIndex += 2
 		}
@@ -160,9 +167,13 @@ func Decompress(src []byte) []byte {
 	}
 
 	fmt.Printf("Commands: %s\n", byteStream(commandLog))
+	// fmt.Printf("Cmd5 length list: %v\n", cmd5LengthList)
+	// fmt.Printf("Cmd6 length list: %v\n", cmd6LengthList)
 	return decompressed
 }
 
+// 1000_0000 -> 0000_0001
+// 0010_1010 -> 0101_0100
 func rotate(b byte) byte {
 	result := byte(0)
 	for i := 0; i < 8; i++ {
