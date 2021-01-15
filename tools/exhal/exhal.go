@@ -26,6 +26,10 @@ var (
 	destIndex = 0
 )
 
+var (
+	commandLog = []byte{}
+)
+
 func main() {
 	os.Exit(Run())
 }
@@ -48,7 +52,6 @@ func Run() int {
 		return exitCodeError
 	}
 
-	fmt.Println(byteStream(src))
 	result := Decompress(src)
 	if len(args) > 1 {
 		output := flag.Arg(1)
@@ -153,8 +156,10 @@ func Decompress(src []byte) []byte {
 			}
 			srcIndex += 2
 		}
+		commandLog = append(commandLog, command)
 	}
 
+	fmt.Printf("Commands: %s\n", byteStream(commandLog))
 	return decompressed
 }
 
