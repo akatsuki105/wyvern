@@ -75,13 +75,13 @@ decompress::
     ld      b, [hl]
     jr      .done
 .shortString
-    ld      b, %11111111                ; b = offset_upper(in shortString)
-    push    af
+    ld      b, a
     ld      a, c
     cpl
     ld      c, a
     inc     c
-    pop     af
+    ld      a, b
+    ld      b, %11111111                ; b = offset_upper(in shortString)
 .done
     push    hl
     ld      h, d                        ; hl = de(dest)
