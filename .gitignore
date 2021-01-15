@@ -6,3 +6,4 @@ build
 **/decompress.s
 **/*.sav
 comped
+tools/bin/exhal
