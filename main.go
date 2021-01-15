@@ -179,7 +179,7 @@ func compress(src []byte) []byte {
 		sOff, sLen := 0, byte(0)
 		for rr < bufPtr {
 			rl := 0
-			for (rr+rl < bufPtr) && (bufPtr+rl < maxSize) && (src[rr+rl] == src[bufPtr+rl]) && (rl < 64) {
+			for (rr+rl < bufPtr) && (bufPtr+rl < maxSize) && (src[rr+rl] == src[bufPtr+rl]) && (rl < 32) {
 				rl++
 			}
 
@@ -348,7 +348,7 @@ func writeShortString(length byte, offset byte) {
 	shortStringLens = append(shortStringLens, length)
 
 	// abcdebcd (length=3 offset=130)-> abcde
-	i := ((length - 1) % 0b0001_1111) | 0b1000_0000
+	i := ((length - 1) % 32) | 0b1000_0000
 	outBuf[outIndex] = i
 	outBuf[outIndex+1] = offset
 	outIndex += 2
