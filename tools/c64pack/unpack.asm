@@ -1,6 +1,4 @@
 
-;*
-;*
 ;* C64PACK unpacker for GB
 ;*
 ;*   Written in RGBDS
@@ -17,6 +15,16 @@
 ; db escMask
 ; .... data ....
 
+; /* LZ77: yet yet yet improved encoding */
+; /* escape bits default = 3 */
+; /* eee00010                            - eof */
+; /* eee00000 nnneeeee                   - escape (n = new escape) */
+; /* eeelllp0 pppppppp                   - short LZ77 L=1..7 (L+1) bytes copied */
+; 
+; /* eee00001 llllllll                   - 0-RLE  (L+1) 0-bytes */
+; /* eeelll01 vvvvvvvv                   - short RLE  L=1..7 (L+1) bytes */
+; /* eeelll11 1lllllll vvvvvvvv          - long RLE  L=0..1023 (L+1) bytes */
+; /* eeeppp11 0llllllp pppppppp          - long LZ77 L=0..63 (L+1) bytes copied */
 
         PUSHS
 
