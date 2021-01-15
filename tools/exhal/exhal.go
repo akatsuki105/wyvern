@@ -67,6 +67,7 @@ func Run() int {
 // Decompress HAL compress format
 // ref: https://github.com/devinacker/exhal/blob/76b12eebd3fcd90fd3f21d427b62d9de8f5fb797/compress.c#L652
 func Decompress(src []byte) []byte {
+	srcIndex, destIndex = 0, 0
 	decompressed := []byte{}
 
 	for {
