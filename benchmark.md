@@ -2,7 +2,7 @@
 
 ## Tools
 
-- wyvern: v1.1.3
+- wyvern: v1.1.4
 - pb16: https://github.com/pinobatch/libbet/blob/8b894e4c02d43ddf2180176ee670e977b0170ccd/tools/pb16.py
 - lz4gb: https://github.com/gitendo/lz4gb/tree/da333add4c956260e6db7c921d6903fe067acc3d
 - pkmncompress: https://github.com/pret/pokered/tree/fc3bbc1358f95038b167d3f8bc9006ab5ab655c1/tools
@@ -13,11 +13,11 @@
 
   Method | Size | Cycles | 
 ---- | ---- | ----
- wyvern & cenotaph.atr | 360 -> 199(55%) | TODO
- wyvern & cenotaph.chr | 4000 -> 3417(85%) | TODO
- wyvern & cenotaph.map | 360 -> 338(93%) | TODO
- wyvern & pokered/abra.2bpp | 400 -> 331(82%) | TODO
- wyvern & pokered/red.2bpp | 784 -> 340(43%) | TODO
+ wyvern & cenotaph.atr | 360 -> 199(55%) | 20460
+ wyvern & cenotaph.chr | 4000 -> 3417(85%) | 189384
+ wyvern & cenotaph.map | 360 -> 338(93%) | 14948
+ wyvern & pokered/abra.2bpp | 400 -> 331(82%) | 18612
+ wyvern & pokered/red.2bpp | 784 -> 340(43%) | 24944
  wyvern & pokecrystal/chris.2bpp | 784 -> 378(48%) | TODO 
  wyvern & pokecrystal/diploma.2bpp | 1792 -> 1202(67%) | TODO 
  wyvern & pokecrystal/ditto.2bpp | 1024 -> 437(42%) | TODO 

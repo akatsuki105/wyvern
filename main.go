@@ -32,6 +32,7 @@ var (
 
 var (
 	byteCtr           = 0
+	byteValues        = []byte{}
 	byteLens          = []byte{}
 	wordCtr           = 0
 	wordLens          = []byte{}
@@ -128,7 +129,8 @@ func Run() int {
 
 		if *verbose {
 			fmt.Printf("Byte: %d, Word: %d, LongString: %d, ShortString: %d, Trash: %d\n", byteCtr, wordCtr, longStringCtr, shortStringCtr, trashCtr)
-			fmt.Printf("Byte length list: %v\n", byteLens)
+			fmt.Printf("Byte Value list: %v\n", byteStream(byteValues))
+			fmt.Printf("Byte length list: %v\n", byteStream(byteLens))
 			fmt.Printf("Word length list: %v\n", wordLens)
 			fmt.Printf("LongString length list: %v\n", longStringLens)
 			fmt.Printf("LongString offset list: %v\n", longStringOffsets)
@@ -293,6 +295,7 @@ func writeByte(length, data byte) {
 		maxSize = len(outBuf)
 	}
 	byteCtr++
+	byteValues = append(byteValues, data)
 	byteLens = append(byteLens, length)
 
 	// aaaaaa -> 6,a
@@ -389,7 +392,7 @@ func (bs byteStream) String() string {
 	builder := &strings.Builder{}
 	builder.WriteString("[")
 	for i, b := range bs {
-		builder.WriteString(fmt.Sprintf("%d", b))
+		builder.WriteString(fmt.Sprintf("%02x", b))
 		if i < len(bs)-1 {
 			builder.WriteString(", ")
 		}
