@@ -24,11 +24,9 @@ decompress::
     jr      nz, .stringOrTrash          ; string functions
     bit     6, a
     jr      nz, .word
-    ; if command(a) is zero, last byte
-    or      a
-    jr      z, .exit                    ; exit, if last byte
 ; .byte
     and     %00111111                   ; calc counter
+    jr      z, .exit                    ; exit, if last byte
     inc     a
     ld      b, a
     ld      a, [hli]
