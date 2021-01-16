@@ -68,7 +68,7 @@ func Run() int {
 	} else {
 		// fmt.Printf("Result: %s\n\n", byteStream(result))
 	}
-	fmt.Printf("Decompression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
+	fmt.Printf("Compression: %d Bytes => %d Bytes (%d%%)\n\n", len(result), len(src), 100*len(src)/len(result))
 	return exitCodeOK
 }
 
@@ -128,6 +128,7 @@ func Decompress(src []byte) []byte {
 			}
 			srcIndex++
 		case 4, 7: // regular backref (NOTE: offset is big-endian)
+			command = 4
 			offset := int(uint16(src[srcIndex])<<8 | uint16(src[srcIndex+1]))
 
 			if offset+length > maxSize {
@@ -166,7 +167,7 @@ func Decompress(src []byte) []byte {
 		commandLog = append(commandLog, command)
 	}
 
-	fmt.Printf("Commands: %s\n", byteStream(commandLog))
+	printCommandLog()
 	// fmt.Printf("Cmd5 length list: %v\n", cmd5LengthList)
 	// fmt.Printf("Cmd6 length list: %v\n", cmd6LengthList)
 	return decompressed
@@ -195,4 +196,24 @@ func (bs byteStream) String() string {
 	}
 	builder.WriteString("]")
 	return builder.String()
+}
+
+func printCommandLog() {
+	cmdName := [7]string{
+		"Trash", "RLE8", "RLE16", "Inc", "LZ", "LZR", "LZ-",
+	}
+	cmdCounter := [7]int{}
+	for _, cmd := range commandLog {
+		cmdCounter[cmd]++
+	}
+	result := "Commands: {"
+	for i := 0; i < 7; i++ {
+		result += fmt.Sprintf("%s: %d", cmdName[i], cmdCounter[i])
+		if i < 6 {
+			result += ", "
+		} else {
+			result += "}"
+		}
+	}
+	fmt.Println(result)
 }

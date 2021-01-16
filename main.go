@@ -33,6 +33,8 @@ var (
 
 var (
 	byteCtr             = 0
+	zeroByteCtr         = 0
+	ffByteCtr           = 0
 	byteValues          = []byte{}
 	byteLens            = []byte{}
 	wordCtr             = 0
@@ -329,6 +331,13 @@ func writeByte(length, data byte) {
 		maxSize = len(outBuf)
 	}
 	byteCtr++
+	if data == 0 {
+		zeroByteCtr++
+	}
+	if data == 0xff {
+		ffByteCtr++
+	}
+
 	byteValues = append(byteValues, data)
 	byteLens = append(byteLens, length)
 
