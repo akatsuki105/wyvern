@@ -32,10 +32,10 @@ start:
 
     INCLUDE "decompress.asm"
 
-SECTION "Cenotaph Src", ROM0[$200]
+SECTION "Compressed Src", ROM0[$200]
 
 src:
-	INCBIN "cenotaph.atr.wyv"
+	INCBIN "packed.wyv"
 
-SECTION "Cenotaph Dest", WRAM0[$c000]
+SECTION "Decompress Dest", WRAM0[$c000]
 dest:

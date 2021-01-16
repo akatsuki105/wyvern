@@ -24,11 +24,9 @@ decompress::
     jr      nz, .stringOrTrash          ; string functions
     bit     6, a
     jr      nz, .word
-    ; if command(a) is zero, last byte
-    or      a
-    jr      z, .exit                    ; exit, if last byte
 ; .byte
     and     %00111111                   ; calc counter
+    jr      z, .exit                    ; exit, if last byte
     inc     a
     ld      b, a
     ld      a, [hli]
@@ -67,14 +65,21 @@ decompress::
     bit     6, a
     jr      nz, .trash
 ; .string
-    ; offset
     ld      c, [hl]                     ; c = offset_lower
-    ld      b, %11111111                ; b = offset_upper(in shortString)
     bit     5, a
-    jr      z, .done
-; .longString                             if bit5 is set, long string
+    jr      z, .shortString
+; .longString                           ; if bit5 is set, long string
     inc     hl                          ; b = offset_upper
     ld      b, [hl]
+    jr      .done
+.shortString
+    ld      b, a
+    ld      a, c
+    cpl
+    ld      c, a
+    inc     c
+    ld      a, b
+    ld      b, %11111111                ; b = offset_upper(in shortString)
 .done
     push    hl
     ld      h, d                        ; hl = de(dest)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -32,14 +33,18 @@ var (
 
 var (
 	byteCtr           = 0
+	zeroByteCtr       = 0
+	ffByteCtr         = 0
+	byteValues        = []byte{}
 	byteLens          = []byte{}
 	wordCtr           = 0
 	wordLens          = []byte{}
+	incByteCtr        = 0
 	longStringCtr     = 0
 	longStringLens    = []byte{}
 	longStringOffsets = []int16{}
-	shortStringCtr    = 0
-	shortStringLens   = []byte{}
+	stringCtr         = 0
+	stringLens        = []byte{}
 	trashCtr          = 0
 	trashLens         = []byte{}
 )
@@ -75,6 +80,7 @@ func Run() int {
 		showVersion     = flag.Bool("V", false, "display Version number and exit")
 		doDecompression = flag.Bool("d", false, "decompression")
 		verbose         = flag.Bool("v", false, "verbose mode")
+		benchmark       = flag.Bool("b", false, "benchmark mode(for debug)")
 	)
 	flag.Parse()
 
@@ -106,7 +112,7 @@ func Run() int {
 					fmt.Fprintf(os.Stderr, "file error: fail to write file\n")
 					return exitCodeError
 				}
-			} else {
+			} else if !*benchmark {
 				fmt.Printf("Result: %s\n\n", byteStream(result))
 			}
 			fmt.Printf("Decompression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
@@ -122,21 +128,19 @@ func Run() int {
 				fmt.Fprintf(os.Stderr, "file error: fail to write file\n")
 				return exitCodeError
 			}
-		} else {
+		} else if !*benchmark {
 			fmt.Printf("Result: %s\n\n", byteStream(result))
 		}
 
 		if *verbose {
-			fmt.Printf("Byte: %d, Word: %d, LongString: %d, ShortString: %d, Trash: %d\n", byteCtr, wordCtr, longStringCtr, shortStringCtr, trashCtr)
-			fmt.Printf("Byte length list: %v\n", byteLens)
-			fmt.Printf("Word length list: %v\n", wordLens)
-			fmt.Printf("LongString length list: %v\n", longStringLens)
-			fmt.Printf("LongString offset list: %v\n", longStringOffsets)
-			fmt.Printf("ShortString length list: %v\n", shortStringLens)
-			fmt.Printf("Trash length list: %v\n", trashLens)
+			fmt.Printf("Byte: %d, Word: %d, String: %d(%d), Trash: %d\n", byteCtr, wordCtr, longStringCtr+stringCtr, stringCtr, trashCtr)
 		}
 
-		fmt.Printf("Compression: %d Bytes => %d Bytes (%d%%)\n", len(src), len(result), 100*len(result)/len(src))
+		if *benchmark {
+			_, filename := filepath.Split(input)
+			fmt.Printf("%s ", filename)
+		}
+		fmt.Printf("Compression: %d Bytes => %d Bytes (%d%%)\n\n", len(src), len(result), 100*len(result)/len(src))
 		return exitCodeOK
 	}
 }
@@ -177,12 +181,12 @@ func compress(src []byte) []byte {
 		sOff, sLen := 0, byte(0)
 		for rr < bufPtr {
 			rl := 0
-			for (rr+rl < bufPtr) && (bufPtr+rl < maxSize) && (src[rr+rl] == src[bufPtr+rl]) && (rl < 64) {
+			for (rr+rl < bufPtr) && (bufPtr+rl < maxSize) && (src[rr+rl] == src[bufPtr+rl]) && (rl < 32) {
 				rl++
 			}
 
 			if rl > int(sLen) {
-				sOff = rr - bufPtr
+				sOff = bufPtr - rr
 				sLen = byte(rl)
 			}
 			rr++
@@ -210,7 +214,7 @@ func compress(src []byte) []byte {
 					writeTrash(byte(trashSize), src[bufPtr-trashSize:])
 					trashSize = 0
 				}
-				if sOff < -128 {
+				if sOff > 0xff {
 					writeLongString(sLen, uint16(sOff))
 				} else {
 					writeShortString(sLen, byte(sOff))
@@ -261,13 +265,13 @@ func decompress(src []byte) []byte {
 				outBuf = append(outBuf, outBuf[from+i])
 			}
 		case bit(b, 7): // if (bit7, bit6, bit5) is (1, 0, 0), use short-string function
-			length, offset := int(b&0b0001_1111+1), int8(src[index])
+			length, offset := int(b&0b0001_1111+1), src[index]
 			index++
-			from := len(outBuf) + int(offset)
+			from := len(outBuf) - int(offset)
 			for i := 0; i < length; i++ {
 				outBuf = append(outBuf, outBuf[from+i])
 			}
-		case bit(b, 6): // if bit6 is set, use word function
+		case bit(b, 6) && !bit(b, 5): // if bit6 is set, use word function
 			length, upper, lower := int(b&0b0011_1111+1), src[index], src[index+1]
 			index += 2
 			for i := 0; i < length; i++ {
@@ -293,6 +297,14 @@ func writeByte(length, data byte) {
 		maxSize = len(outBuf)
 	}
 	byteCtr++
+	if data == 0 {
+		zeroByteCtr++
+	}
+	if data == 0xff {
+		ffByteCtr++
+	}
+
+	byteValues = append(byteValues, data)
 	byteLens = append(byteLens, length)
 
 	// aaaaaa -> 6,a
@@ -328,7 +340,8 @@ func writeLongString(length byte, offset uint16) {
 	longStringOffsets = append(longStringOffsets, int16(offset))
 
 	// abcdebcd (length=3 offset=-257)-> abcde
-	i := ((length - 1) % 0b0001_1111) | 0b1010_0000
+	offset = uint16(-int(offset))
+	i := ((length - 1) % 32) | 0b1010_0000
 	outBuf[outIndex] = i
 	outBuf[outIndex+1] = byte(offset)
 	outBuf[outIndex+2] = byte(offset >> 8)
@@ -340,11 +353,11 @@ func writeShortString(length byte, offset byte) {
 		outBuf = extendSlice(outBuf)
 		maxSize = len(outBuf)
 	}
-	shortStringCtr++
-	shortStringLens = append(shortStringLens, length)
+	stringCtr++
+	stringLens = append(stringLens, length)
 
-	// abcdebcd (length=3 offset=-4)-> abcde
-	i := ((length - 1) % 0b0001_1111) | 0b1000_0000
+	// abcdebcd (length=3 offset=130)-> abcde
+	i := ((length - 1) % 32) | 0b1000_0000
 	outBuf[outIndex] = i
 	outBuf[outIndex+1] = offset
 	outIndex += 2
@@ -389,7 +402,7 @@ func (bs byteStream) String() string {
 	builder := &strings.Builder{}
 	builder.WriteString("[")
 	for i, b := range bs {
-		builder.WriteString(fmt.Sprintf("%d", b))
+		builder.WriteString(fmt.Sprintf("%02x", b))
 		if i < len(bs)-1 {
 			builder.WriteString(", ")
 		}
@@ -408,4 +421,14 @@ func extendSlice(src []byte) []byte {
 		result[i] = b
 	}
 	return result
+}
+
+func printDetail() {
+	fmt.Printf("Byte Value list: %v\n", byteStream(byteValues))
+	fmt.Printf("Byte: %v\n", byteStream(byteLens))
+	fmt.Printf("Word: %v\n", wordLens)
+	fmt.Printf("LongS: %v\n", longStringLens)
+	fmt.Printf("LongString offset list: %v\n", longStringOffsets)
+	fmt.Printf("ShortS: %v\n", stringLens)
+	fmt.Printf("Trash: %v\n", trashLens)
 }
