@@ -172,12 +172,6 @@ func compress(src []byte) []byte {
 			wordLen++
 		}
 
-		// 1,2,3,4,5,... -> (1, 5)
-		// incrementalByteLen := byte(1)
-		// for (bufPtr+1 < maxSize) && (bufPtr+int(incrementalByteLen) < maxSize) && (src[bufPtr+int(incrementalByteLen)] == curByte+incrementalByteLen) && (incrementalByteLen < 16) {
-		// 	incrementalByteLen++
-		// }
-
 		// offset: 01234567
 		// bytes:  abcdebcd
 		// rr:          ↑
@@ -221,13 +215,6 @@ func compress(src []byte) []byte {
 			}
 			writeByte(byteLen, curByte)
 			bufPtr += int(byteLen)
-		// case (incrementalByteLen > 2) && incrementalByteLen > wordLen && incrementalByteLen > sLen:
-		// 	if trashSize > 0 {
-		// 		writeTrash(byte(trashSize), src[bufPtr-trashSize:])
-		// 		trashSize = 0
-		// 	}
-		// 	writeIncrementalByte(incrementalByteLen, curByte)
-		// 	bufPtr += int(incrementalByteLen)
 		case (wordLen > 2) && (wordLen*2 > sLen):
 			if trashSize > 0 {
 				writeTrash(byte(trashSize), src[bufPtr-trashSize:])
@@ -313,12 +300,6 @@ func decompress(src []byte) []byte {
 				outBuf = append(outBuf, upper)
 				outBuf = append(outBuf, lower)
 			}
-		// case bit(b, 6) && bit(b, 5) && bit(b, 4): // incremental byte
-		// 	length, data := int(b&0b0000_1111+1), src[index]
-		// 	index++
-		// 	for i := 0; i < length; i++ {
-		// 		outBuf = append(outBuf, data+byte(i))
-		// 	}
 		case bit(b, 6) && bit(b, 5): // rotate string
 			length, upper, lower := int(b&0b0000_1111+1), src[index+1], src[index]
 			offset := int16(upper)<<8 | int16(lower)
@@ -356,19 +337,6 @@ func writeByte(length, data byte) {
 	outBuf[outIndex+1] = data
 	outIndex += 2
 }
-
-// func writeIncrementalByte(length, data byte) {
-// 	if outIndex+2 >= len(outBuf) {
-// 		outBuf = extendSlice(outBuf)
-// 		maxSize = len(outBuf)
-// 	}
-// 	incByteCtr++
-
-// 	length = ((length - 1) % 16) | 0b0111_0000
-// 	outBuf[outIndex] = length
-// 	outBuf[outIndex+1] = data
-// 	outIndex += 2
-// }
 
 func writeWord(length byte, data uint16) {
 	if outIndex+3 >= maxSize {
