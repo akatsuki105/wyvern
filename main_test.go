@@ -5,15 +5,35 @@ import (
 	"testing"
 )
 
+func TestRotate(t *testing.T) {
+	src := byte(0x4b)
+	rotated := rotate(src)
+
+	if rotated != 0xd2 {
+		t.Fatalf("TestRotate failed")
+	}
+
+	rotated2 := rotate(rotated)
+	if rotated2 != src {
+		t.Fatalf("TestRotate failed")
+	}
+}
+
 func TestRun(t *testing.T) {
 	var filenames = []string{
 		"./test/cenotaph.atr",
 		"./test/cenotaph.chr",
 		"./test/cenotaph.map",
+		"./test/pokered/abra.2bpp",
+		"./test/pokered/red.2bpp",
+		"./test/pokecrystal/suicune_jump.2bpp",
 	}
 
 	for _, filename := range filenames {
-		src, _ := ioutil.ReadFile(filename)
+		src, err := ioutil.ReadFile(filename)
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
 		compressed := compress(src)
 		decompressed := decompress(compressed)
 
