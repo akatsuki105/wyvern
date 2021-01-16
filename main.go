@@ -32,23 +32,21 @@ var (
 )
 
 var (
-	byteCtr             = 0
-	zeroByteCtr         = 0
-	ffByteCtr           = 0
-	byteValues          = []byte{}
-	byteLens            = []byte{}
-	wordCtr             = 0
-	wordLens            = []byte{}
-	incByteCtr          = 0
-	longStringCtr       = 0
-	longStringLens      = []byte{}
-	longStringOffsets   = []int16{}
-	stringCtr           = 0
-	stringLens          = []byte{}
-	rotateStringCtr     = 0
-	longRotateStringCtr = 0
-	trashCtr            = 0
-	trashLens           = []byte{}
+	byteCtr           = 0
+	zeroByteCtr       = 0
+	ffByteCtr         = 0
+	byteValues        = []byte{}
+	byteLens          = []byte{}
+	wordCtr           = 0
+	wordLens          = []byte{}
+	incByteCtr        = 0
+	longStringCtr     = 0
+	longStringLens    = []byte{}
+	longStringOffsets = []int16{}
+	stringCtr         = 0
+	stringLens        = []byte{}
+	trashCtr          = 0
+	trashLens         = []byte{}
 )
 
 func init() {
@@ -135,7 +133,7 @@ func Run() int {
 		}
 
 		if *verbose {
-			fmt.Printf("Byte: %d, Word: %d, String: %d(%d), RotateS: %d(%d), Trash: %d\n", byteCtr, wordCtr, longStringCtr+stringCtr, stringCtr, longRotateStringCtr+rotateStringCtr, rotateStringCtr, trashCtr)
+			fmt.Printf("Byte: %d, Word: %d, String: %d(%d), Trash: %d\n", byteCtr, wordCtr, longStringCtr+stringCtr, stringCtr, trashCtr)
 		}
 
 		if *benchmark {
@@ -171,7 +169,7 @@ func compress(src []byte) []byte {
 			curWord |= uint16(src[bufPtr+1])
 		}
 		wordLen := byte(1)
-		for (bufPtr+int(wordLen)*2+2 < maxSize) && (binary.BigEndian.Uint16(src[bufPtr+int(wordLen)*2:]) == curWord) && (wordLen < 32) {
+		for (bufPtr+int(wordLen)*2+2 < maxSize) && (binary.BigEndian.Uint16(src[bufPtr+int(wordLen)*2:]) == curWord) && (wordLen < 64) {
 			wordLen++
 		}
 
@@ -192,22 +190,6 @@ func compress(src []byte) []byte {
 				sLen = byte(rl)
 			}
 			rr++
-		}
-
-		// 0x10, 0x20, 0x40, 0x08, 0x04, 0x02 -> 0x10, 0x20, 0x40, (-3, 3)
-		rotateSPtr := 0
-		rotateSOff, rotateSLen := 0, byte(0)
-		for rotateSPtr < bufPtr {
-			rl := 0
-			for (rotateSPtr+rl < bufPtr) && (bufPtr+rl < maxSize) && (rotate(src[rotateSPtr+rl]) == src[bufPtr+rl]) && (rl < 32) {
-				rl++
-			}
-
-			if rl > int(rotateSLen) {
-				rotateSOff = bufPtr - rotateSPtr
-				rotateSLen = byte(rl)
-			}
-			rotateSPtr++
 		}
 
 		switch {
@@ -238,13 +220,6 @@ func compress(src []byte) []byte {
 					writeShortString(sLen, byte(sOff))
 				}
 				bufPtr += int(sLen)
-			case rotateSLen > 3:
-				if trashSize > 0 {
-					writeTrash(byte(trashSize), src[bufPtr-trashSize:])
-					trashSize = 0
-				}
-				writeRotateString(rotateSLen, uint16(rotateSOff))
-				bufPtr += int(rotateSLen)
 			case trashSize >= 64:
 				writeTrash(byte(trashSize), src[bufPtr-trashSize:])
 				trashSize = 0
@@ -297,20 +272,11 @@ func decompress(src []byte) []byte {
 				outBuf = append(outBuf, outBuf[from+i])
 			}
 		case bit(b, 6) && !bit(b, 5): // if bit6 is set, use word function
-			length, upper, lower := int(b&0b0001_1111+1), src[index], src[index+1]
+			length, upper, lower := int(b&0b0011_1111+1), src[index], src[index+1]
 			index += 2
 			for i := 0; i < length; i++ {
 				outBuf = append(outBuf, upper)
 				outBuf = append(outBuf, lower)
-			}
-		case bit(b, 6) && bit(b, 5): // rotate string
-			length, upper, lower := int(b&0b0001_1111+1), src[index+1], src[index]
-			offset := int16(upper)<<8 | int16(lower)
-
-			index += 2
-			from := len(outBuf) + int(offset)
-			for i := 0; i < length; i++ {
-				outBuf = append(outBuf, rotate(outBuf[from+i]))
 			}
 		default:
 			// RLE Byte
@@ -357,7 +323,7 @@ func writeWord(length byte, data uint16) {
 	wordLens = append(wordLens, length)
 
 	// ababab -> 3ab
-	length = ((length - 1) % 32) | 0b0100_0000
+	length = ((length - 1) % 64) | 0b0100_0000
 	outBuf[outIndex] = length
 	outBuf[outIndex+1] = byte(data >> 8)
 	outBuf[outIndex+2] = byte(data)
@@ -395,25 +361,6 @@ func writeShortString(length byte, offset byte) {
 	outBuf[outIndex] = i
 	outBuf[outIndex+1] = offset
 	outIndex += 2
-}
-
-func writeRotateString(length byte, offset uint16) {
-	if outIndex+3 >= maxSize {
-		outBuf = extendSlice(outBuf)
-		maxSize = len(outBuf)
-	}
-	if offset > 255 {
-		longRotateStringCtr++
-	} else {
-		rotateStringCtr++
-	}
-
-	offset = uint16(-int(offset))
-	i := ((length - 1) % 32) | 0b0110_0000
-	outBuf[outIndex] = i
-	outBuf[outIndex+1] = byte(offset)
-	outBuf[outIndex+2] = byte(offset >> 8)
-	outIndex += 3
 }
 
 func writeTrash(length byte, pos []byte) {
@@ -472,18 +419,6 @@ func extendSlice(src []byte) []byte {
 	result := make([]byte, len(src)*2)
 	for i, b := range src {
 		result[i] = b
-	}
-	return result
-}
-
-// 1000_0000 -> 0000_0001
-// 0010_1010 -> 0101_0100
-func rotate(b byte) byte {
-	result := byte(0)
-	for i := 0; i < 8; i++ {
-		if b&(1<<i) != 0 {
-			result |= (1 << (7 - i))
-		}
 	}
 	return result
 }

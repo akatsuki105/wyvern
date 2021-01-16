@@ -5,20 +5,6 @@ import (
 	"testing"
 )
 
-func TestRotate(t *testing.T) {
-	src := byte(0x4b)
-	rotated := rotate(src)
-
-	if rotated != 0xd2 {
-		t.Fatalf("TestRotate failed")
-	}
-
-	rotated2 := rotate(rotated)
-	if rotated2 != src {
-		t.Fatalf("TestRotate failed")
-	}
-}
-
 func TestRun(t *testing.T) {
 	var filenames = []string{
 		"./test/cenotaph.atr",
