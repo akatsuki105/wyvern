@@ -47,6 +47,11 @@ benchmark:
 	@make build
 	@for target in $(TARGETS); do ./wyvern -b -v $$target; done
 
+.PHONY: benchmark-pb16
+benchmark-pb16:
+	@make build
+	@for target in $(TARGETS); do echo $$target && ./tools/bin/pb16.py $$target; done
+
 .PHONY: benchmark-exhal
 benchmark-exhal:
 	@go build -o tools/bin/exhal tools/exhal/exhal.go
