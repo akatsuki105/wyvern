@@ -47,16 +47,16 @@ If you want to know more, jump to [Benchmark document](./benchmark.md).
 
 ```sh
 $ ./wyvern ./test/cenotaph.atr
-# Compression: 360 Bytes => 199 Bytes (55%)
-# Decompression: 10840 Cycles
+# Compression: 360 Bytes => 196 Bytes (54%)
+# Decompression: 20996 Cycles
 
 $ ./wyvern ./test/cenotaph.chr
-# Compression: 4000 Bytes => 3417 Bytes (85%)
-# Decompression: 114448 Cycles
+# Compression: 4000 Bytes => 3397 Bytes (84%)
+# Decompression: 190972 Cycles
 
 $ ./wyvern ./test/cenotaph.map
-# Compression: 360 Bytes => 338 Bytes (93%)
-# Decompression: 9304 Cycles
+# Compression: 360 Bytes => 336 Bytes (93%)
+# Decompression: 14984 Cycles
 ```
 
 ## References
